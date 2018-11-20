@@ -10,12 +10,10 @@ import (
 	"strings"
 )
 
-const (
-	host = "localhost"
-	port = "5163"
-)
 
 func main()  {
+	host := "localhost"
+	port := "5163"
 	endpoint := strings.Join([]string{host, port}, ":")
 	listener, err := net.Listen("tcp", endpoint)
 	if err != nil {
@@ -25,6 +23,7 @@ func main()  {
 	fmt.Printf("Server is running at %s\n", endpoint)
 
 	for {
+		// 接続するまで待つ
 		conn, err := listener.Accept()
 
 		if err != nil {
@@ -34,6 +33,7 @@ func main()  {
 		go func() {
 			fmt.Printf("Accept %v\n", conn.RemoteAddr())
 
+			// クライアントからのリクエストをパースする
 			request, err := http.ReadRequest(bufio.NewReader(conn))
 
 			if err != nil {
