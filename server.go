@@ -10,11 +10,13 @@ import (
 	"strings"
 )
 
+const (
+	Host string = "localhost"
+	Port string = "5163"
+)
 
 func main()  {
-	host := "localhost"
-	port := "5163"
-	endpoint := strings.Join([]string{host, port}, ":")
+	endpoint := strings.Join([]string{Host, Port}, ":")
 	listener, err := net.Listen("tcp", endpoint)
 	if err != nil {
 		panic(err)
