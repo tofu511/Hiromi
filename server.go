@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"strings"
+	"time"
 )
 
 const (
@@ -48,8 +49,22 @@ func main()  {
 
 			fmt.Println(string(dump))
 
-			fmt.Fprint(conn, "HTTP/1.1 240 Exotic Japan!\r\n\r\n Hi!")
+			now := time.Now().Format(time.RFC1123)
+
+			response := createResponse("240 Exotic Japan!", "Hiromi", now, "Hi!")
+
+			fmt.Fprint(conn, response)
+			
 			conn.Close()
 		}()
 	}
+}
+
+func createResponse(statusCode, server, date, body string) string {
+	return fmt.Sprintf(`HTTP/1.1 %s 
+Server: %s
+Date: %s
+Connection: Close
+
+%s`, statusCode, server, date, body)
 }
