@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"io/ioutil"
 	"net"
 	"net/http"
 	"net/http/httputil"
@@ -49,14 +48,7 @@ func main()  {
 
 			fmt.Println(string(dump))
 
-			response := http.Response{
-				StatusCode:200,
-				ProtoMajor:1,
-				ProtoMinor:0,
-				Body: ioutil.NopCloser(
-					strings.NewReader("Exotic Japan!!\n")),
-			}
-			response.Write(conn)
+			fmt.Fprint(conn, "HTTP/1.1 240 Exotic Japan!\r\n\r\n Hi!")
 			conn.Close()
 		}()
 	}
