@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"io/ioutil"
 	"net"
 	"net/http"
 	"net/http/httputil"
@@ -11,8 +12,9 @@ import (
 )
 
 const (
-	Host string = "localhost"
-	Port string = "5163"
+	Host         string = "localhost"
+	Port         string = "5163"
+	DocumentRoot        = "./public/"
 )
 
 func main()  {
@@ -49,9 +51,13 @@ func main()  {
 
 			fmt.Println(string(dump))
 
-			now := time.Now().Format(time.RFC1123)
+			file, err := ioutil.ReadFile(DocumentRoot + "index.html")
 
-			response := createResponse("240 Exotic Japan!", "Hiromi", now, "Hi!")
+			if err != nil {
+				panic(err)
+			}
+
+			response := createResponse("240 Exotic Japan!", string(file))
 
 			fmt.Fprint(conn, response)
 			
@@ -60,11 +66,13 @@ func main()  {
 	}
 }
 
-func createResponse(statusCode, server, date, body string) string {
+func createResponse(statusCode, body string) string {
+	now := time.Now().Format(time.RFC1123)
+	server := "Hiromi"
 	return fmt.Sprintf(`HTTP/1.1 %s 
 Server: %s
 Date: %s
 Connection: Close
 
-%s`, statusCode, server, date, body)
+%s`, statusCode, server, now, body)
 }
