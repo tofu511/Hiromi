@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"net"
 	"net/http"
-	"net/http/httputil"
 	"os"
 	"strings"
 	"time"
@@ -37,20 +36,16 @@ func main()  {
 		go func() {
 			request := parseRequest(conn)
 
-			dump, err := httputil.DumpRequest(request, true)
-			if err != nil {
-				panic(err)
-			}
-
-			fmt.Println(string(dump))
-
-			path := convertPath(DocumentRoot + request.URL.Path)
-			file := readFileFromUrlPath(path)
+			path := convertPath(request.URL.Path)
+			file := readFileFromUrlPath(DocumentRoot + path)
 
 			status := "200 OK"
-			if !exists(path) {
+			if !exists(DocumentRoot + path) {
 				status = "404 Not Found"
 			}
+
+			lang := request.Header.Get("Accept-Language")
+			fmt.Println(lang)
 
 			response := createResponse(status, "text/html", string(file))
 
