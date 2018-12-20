@@ -3,10 +3,12 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net"
 	"net/http"
 	"net/http/httputil"
+	"os"
 	"strings"
 	"time"
 )
@@ -14,7 +16,7 @@ import (
 const (
 	Host         string = "localhost"
 	Port         string = "5163"
-	DocumentRoot        = "./public/"
+	DocumentRoot        = "./public"
 )
 
 func main()  {
@@ -23,8 +25,6 @@ func main()  {
 	if err != nil {
 		panic(err)
 	}
-
-	fmt.Printf("Server is running at %s\n", endpoint)
 
 	for {
 		// 接続するまで待つ
@@ -35,14 +35,7 @@ func main()  {
 		}
 
 		go func() {
-			fmt.Printf("Accept %v\n", conn.RemoteAddr())
-
-			// クライアントからのリクエストをパースする
-			request, err := http.ReadRequest(bufio.NewReader(conn))
-
-			if err != nil {
-				panic(err)
-			}
+			request := parseRequest(conn)
 
 			dump, err := httputil.DumpRequest(request, true)
 			if err != nil {
@@ -51,28 +44,66 @@ func main()  {
 
 			fmt.Println(string(dump))
 
-			file, err := ioutil.ReadFile(DocumentRoot + "index.html")
+			path := convertPath(DocumentRoot + request.URL.Path)
+			file := readFileFromUrlPath(path)
 
-			if err != nil {
-				panic(err)
+			status := "200 OK"
+			if !exists(path) {
+				status = "404 Not Found"
 			}
 
-			response := createResponse("240 Exotic Japan!", string(file))
+			response := createResponse(status, "text/html", string(file))
 
 			fmt.Fprint(conn, response)
-			
+
 			conn.Close()
 		}()
 	}
 }
 
-func createResponse(statusCode, body string) string {
+func createResponse(statusCode, contentType, body string) string {
 	now := time.Now().Format(time.RFC1123)
 	server := "Hiromi"
 	return fmt.Sprintf(`HTTP/1.1 %s 
 Server: %s
 Date: %s
 Connection: Close
+Content-type: %s
 
-%s`, statusCode, server, now, body)
+%s`, statusCode, server, now, contentType, body)
+}
+
+func parseRequest(reader io.Reader) *http.Request {
+	request, err := http.ReadRequest(bufio.NewReader(reader))
+
+	if err != nil {
+		panic(err)
+	}
+	return request
+}
+
+func readFileFromUrlPath(path string) []byte {
+	if !exists(path) {
+		path = DocumentRoot + "/404.html"
+	}
+
+	file, err := ioutil.ReadFile(path)
+
+	if err != nil {
+		panic(err)
+	}
+
+	return file
+}
+
+func convertPath(path string) string {
+	if path == "/" {
+		path = "/index.html"
+	}
+	return path
+}
+
+func exists(filePath string) bool {
+	_, err := os.Stat(filePath)
+	return err == nil
 }
