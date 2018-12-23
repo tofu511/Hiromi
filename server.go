@@ -8,6 +8,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"path"
 	"strconv"
 	"strings"
 	"time"
@@ -19,7 +20,19 @@ const (
 	DocumentRoot        = "./public"
 )
 
-func main()  {
+var contentTypeMap = map[string]string{
+	".html": "text/html",
+	".htm":  "text/html",
+	".txt":  "text/plain",
+	".css":  "text/css",
+	".png":  "image/png",
+	".jpg":  "image/jpg",
+	".jpeg": "image/jpeg",
+	".gif":  "image/gif",
+	".ico":  "image/x-icon",
+}
+
+func main() {
 	endpoint := strings.Join([]string{Host, Port}, ":")
 	listener, err := net.Listen("tcp", endpoint)
 	if err != nil {
@@ -36,14 +49,15 @@ func main()  {
 		go func() {
 			request := parseRequest(conn)
 
-			path := convertPath(DocumentRoot + request.URL.Path)
-			file := readFileFromUrlPath(path)
+			filePath := convertPath(DocumentRoot + request.URL.Path)
+			file := readFileFromUrlPath(filePath)
 
 			lang := request.Header.Get("Accept-Language")
-			fmt.Println(lang)
-			status := createStatus(path, lang)
+			status := createStatus(filePath, lang)
 
-			response := createResponse(status, "text/html", string(file))
+			contentType, _ := contentTypeMap[path.Ext(filePath)]
+
+			response := createResponse(status, contentType, string(file))
 
 			fmt.Fprint(conn, response)
 
@@ -74,7 +88,7 @@ func createResponse(statusCode, contentType, body string) string {
 	return fmt.Sprintf(`HTTP/1.1 %s 
 Server: %s
 Date: %s
-Connection: Close
+Connection: close
 Content-type: %s
 
 %s`, statusCode, server, now, contentType, body)
