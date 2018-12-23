@@ -8,6 +8,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -26,7 +27,6 @@ func main()  {
 	}
 
 	for {
-		// 接続するまで待つ
 		conn, err := listener.Accept()
 
 		if err != nil {
@@ -36,16 +36,12 @@ func main()  {
 		go func() {
 			request := parseRequest(conn)
 
-			path := convertPath(request.URL.Path)
-			file := readFileFromUrlPath(DocumentRoot + path)
-
-			status := "200 OK"
-			if !exists(DocumentRoot + path) {
-				status = "404 Not Found"
-			}
+			path := convertPath(DocumentRoot + request.URL.Path)
+			file := readFileFromUrlPath(path)
 
 			lang := request.Header.Get("Accept-Language")
 			fmt.Println(lang)
+			status := createStatus(path, lang)
 
 			response := createResponse(status, "text/html", string(file))
 
@@ -54,6 +50,22 @@ func main()  {
 			conn.Close()
 		}()
 	}
+}
+
+func createStatus(path, acceptLang string) string {
+	statusCode := 200
+	statusText := "OK"
+	if !exists(path) {
+		statusCode = 404
+		statusText = "Not Found"
+	}
+
+	if statusCode == 200 && strings.Split(acceptLang, ",")[0] == "ja-JP" {
+		statusCode = 240
+		statusText = "Exotic Japan!"
+	}
+
+	return strings.Join([]string{strconv.Itoa(statusCode), statusText}, " ")
 }
 
 func createResponse(statusCode, contentType, body string) string {
@@ -72,7 +84,7 @@ func parseRequest(reader io.Reader) *http.Request {
 	request, err := http.ReadRequest(bufio.NewReader(reader))
 
 	if err != nil {
-		panic(err)
+		fmt.Fprint(os.Stderr, err)
 	}
 	return request
 }
@@ -85,20 +97,24 @@ func readFileFromUrlPath(path string) []byte {
 	file, err := ioutil.ReadFile(path)
 
 	if err != nil {
-		panic(err)
+		fmt.Fprint(os.Stderr, err)
 	}
 
 	return file
 }
 
 func convertPath(path string) string {
-	if path == "/" {
-		path = "/index.html"
+	if path == DocumentRoot + "/" {
+		path = DocumentRoot + "/index.html"
 	}
 	return path
 }
 
 func exists(filePath string) bool {
 	_, err := os.Stat(filePath)
+
+	if err != nil {
+		fmt.Fprint(os.Stderr, err)
+	}
 	return err == nil
 }
