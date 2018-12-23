@@ -39,6 +39,8 @@ func main() {
 		panic(err)
 	}
 
+	fmt.Printf("Server is running at %s\n", endpoint)
+
 	for {
 		conn, err := listener.Accept()
 
@@ -52,8 +54,7 @@ func main() {
 			filePath := convertPath(DocumentRoot + request.URL.Path)
 			file := readFileFromUrlPath(filePath)
 
-			lang := request.Header.Get("Accept-Language")
-			status := createStatus(filePath, lang)
+			status := createStatus(filePath, request.Header.Get("Accept-Language"))
 
 			contentType, _ := contentTypeMap[path.Ext(filePath)]
 
