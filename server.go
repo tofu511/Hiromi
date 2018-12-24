@@ -75,7 +75,7 @@ func createStatus(path, acceptLang string) string {
 		statusText = "Not Found"
 	}
 
-	if statusCode == 200 && acceptLang[:2] == "ja" {
+	if statusCode == 200 && acceptLang != "" && acceptLang[:2] == "ja" {
 		statusCode = 240
 		statusText = "Exotic Japan!"
 	}
