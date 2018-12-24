@@ -8,6 +8,7 @@ Go言語で実装されたシンプルなHTTPサーバーです。Go言語なの
 - リクエストはブロックしない（マルチスレッド）
 - Keep-Aliveしない
 - HTTP Cacheしない
+- `Accept-Language`が`ja`の場合、ステータスコード`200 OK`が`240 Exotic Japan!`になる
 
 ## 起動方法
 ```sh
