@@ -1,4 +1,12 @@
 # Hiromi
+```
+出逢いは億千万の胸騒ぎ まばゆいくらいに
+エキゾチック・ジャパン
+出逢いは億千万の胸騒ぎ 命のときめき
+エキゾチック エキゾチック・ジャパン ジャパン
+(2億4千万の瞳より)
+```
+
 Go言語で実装されたシンプルなHTTPサーバーです。Go言語なので名前は`Hiromi`です。  
 言語学習のために作成しました。
 
@@ -8,7 +16,7 @@ Go言語で実装されたシンプルなHTTPサーバーです。Go言語なの
 - リクエストはブロックしない（マルチスレッド）
 - Keep-Aliveしない
 - HTTP Cacheしない
-- `Accept-Language`が`ja`の場合、ステータスコード`200 OK`が`240 Exotic Japan!`になる
+- `Accept-Language`が`ja`の場合、ステータスコード`200 OK`が`240 Exotic!`になる
 
 ## 起動方法
 ```sh
@@ -23,4 +31,4 @@ $ go run server.go
 ```
 
 ## Special Thanks
-[simple-http-server](https://github.com/todokr/simple-http-server)
+[@todokr](https://github.com/todokr)
