@@ -77,7 +77,7 @@ func createStatus(path, acceptLang string) string {
 
 	if statusCode == 200 && acceptLang != "" && acceptLang[:2] == "ja" {
 		statusCode = 240
-		statusText = "Exotic Japan!"
+		statusText = "Exotic!"
 	}
 
 	return strings.Join([]string{strconv.Itoa(statusCode), statusText}, " ")
